@@ -16,3 +16,9 @@ function say() {
 
 对上述代码进行分析，该语句依赖的变量为空，定义的变量为say。因为 name 属性可以在 say 函数的作用域中找到，故不需要依赖外部的 name 变量。
 
+
+
+参考
+
+1. https://cloud.tencent.com/developer/article/1688742
+
