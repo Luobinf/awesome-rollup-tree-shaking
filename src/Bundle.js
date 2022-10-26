@@ -8,12 +8,17 @@ export default class Bundle {
     constructor(options) {
         this.entryPath = resolve(options.entry).replace(/\.js$/, '') + '.js';
         this.resolvePath = options.resolvePath
+        this.entryModule = null
         this.modulePromises = {}  // 存放所有的模块
+        this.statements = []
     }
 
     build() {
         return this.fetchModule(this.entryPath).then((entryModule) => {
-
+            this.entryModule = entryModule
+            return entryModule.expandAllStatements(true)
+        }).then(statements => {
+            this.statements = statements
         })
     }
 
@@ -34,9 +39,13 @@ export default class Bundle {
                 this.modulePromises[path] = module
                 return module
             } else {
-                throw new Error(`${path} file is not exist`)
+                throw new Error(`file ${path} is not exist`)
             }
         })
+    }
+
+    generate(options = {}) {
+
     }
 
 }

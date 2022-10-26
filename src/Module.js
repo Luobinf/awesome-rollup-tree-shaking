@@ -95,20 +95,27 @@ export default class Module {
 				}
 			}
 
-			if(node.type === 'ExportDefaultDeclaration') {
+			if (node.type === 'ExportDefaultDeclaration') {
 
 				const isDeclaration = /Declaration$/.test(node.declaration.type);
 
-					this.exports.default = {
-						node,
-						exportedName: 'default',
-						localName: isDeclaration ? node.declaration.id.name : 'default',
-						isDeclaration
-					};
+				this.exports.default = {
+					node,
+					exportedName: 'default',
+					localName: isDeclaration ? node.declaration.id.name : 'default',
+					isDeclaration
+				};
 			}
 
 		});
 
 		analyse(this.ast, this.code, this)
+
+		// 获取当前模块所定义的 statement 语句
+		this.ast.body.forEach(statement => {
+			Object.keys(statement._defines).forEach(name => {
+				this.definitions[name] = statement
+			})
+		})
 	}
 }

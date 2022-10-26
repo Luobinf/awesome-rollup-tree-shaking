@@ -8,7 +8,10 @@ export function rollup(entry, options) {
     return bundle.build().then(() => {
         return {
             generate() {
-
+                return bundle.generate(options)
+            },
+            write(dest, options = {}) {
+                
             }
         }
     })
