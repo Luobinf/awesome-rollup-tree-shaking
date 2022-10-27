@@ -8,7 +8,6 @@ export default function analyse(ast, magicString, module) {
 	let scope = new Scope({
 		name: '全局作用域'
 	})
-	let newScope;
 	let currentTopLevelStatement = null
 
 	function addScope(declarator) {
@@ -34,6 +33,7 @@ export default function analyse(ast, magicString, module) {
 
 		walk(statement, {
 			enter(node) {
+				let newScope;
 				switch (node.type) {
 					case 'VariableDeclaration':
 						// 逻辑
@@ -45,9 +45,15 @@ export default function analyse(ast, magicString, module) {
 					case 'FunctionDeclaration':
 					case 'ArrowFunctionExpression':
 					case 'FunctionExpression':
+						let names = node.params.map( param => param.name)
+						if(node.type === 'FunctionDeclaration') {
+							addScope(node)
+						} else if( node.type === 'FunctionExpression' && node.id ){
+							names.push(node.id.name)
+						}
 						newScope = new Scope({
 							name: node.id.name,
-							names: node.params,
+							names,
 							parent: scope,
 						})
 					// 例如 if(true) {} 中的 块级作用域
@@ -62,7 +68,7 @@ export default function analyse(ast, magicString, module) {
 						break
 				}
 				if(newScope) {
-					Object.defineProperties(node, '_scope', {
+					Object.defineProperty(node, '_scope', {
 						value: newScope
 					})
 					scope = newScope

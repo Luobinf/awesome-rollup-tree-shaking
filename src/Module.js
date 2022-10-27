@@ -118,4 +118,68 @@ export default class Module {
 			})
 		})
 	}
+
+	// expandAllStatements，整理对应的 statement，某些 statement 需要直接删除掉（如 import 声明、变量声明,等后面有地方去使用时才使用这些语句），
+	//找出 statement 所依赖的变量语句，找出来放入到 result 中去，当前自身语句也需要存到 result 中去。最后返回该 result。
+	expandAllStatements(isEntryModule) {
+		let allStatements = []
+
+		this.ast.body.forEach(statement => {
+			if (statement.type === 'ImportDeclaration') {
+				return
+			}
+			if (statement.type === 'VariableDeclaration') {
+				return
+			}
+			let statements = this.expandStatement(statement)
+			allStatements.push(...statements)
+		})
+
+
+		return allStatements
+	}
+
+	expandStatement(statement) {
+		if( statement._included ) {
+			return []
+		}
+
+		statement._included = true
+
+		let result = []
+		const _dependsOn = Object.keys(statement._dependsOn)
+		_dependsOn.forEach( name => {
+			let definitions = this.define(name)
+			result.push(...definitions)
+		})
+
+		// 语句自身也需要放入到 result 结果中去。
+		result.push(statement)
+
+		return result
+	}
+
+	define(name) {
+		let result = []
+
+		// 判断变量是否是从 import 导入的。
+		if (hasOwnProperty(this.imports, name)) {
+			const { source, importedName } = this.imports[name]
+			const importModule = this.bundle.fetchModule(source, this.path)
+			// export {
+			// 	name as name1
+			// }
+			// export const name = 'xx'
+			const { localName, exportedName } = importModule.exports[importedName]
+			result = importModule.define(localName)
+		} else {
+			let statement = this.definitions[name]
+			if(statement && !statement._included) {
+				result = this.expandStatement(statement)
+			}
+		}
+		
+		return result
+	}
+
 }

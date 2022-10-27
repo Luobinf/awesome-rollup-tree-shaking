@@ -1,6 +1,14 @@
 import util from "node:util";
+import fs from "node:fs";
 
-export async function fileIsExist(filePath) {
-    const stats = await util.promisify(fs.stat)(filePath);
-    return stats.isFile()
+export function fileIsExist(filePath) {
+    return fs.existsSync(filePath)
 }
+
+export function hasOwnProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+
+
+
