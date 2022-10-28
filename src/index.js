@@ -4,16 +4,8 @@ export function rollup(entry, options) {
     const bundle = new Bundle({
         entry, 
         resolvePath: options.resolvePath,
+        dest: options.dest
     })
-    return bundle.build().then(() => {
-        return {
-            generate() {
-                return bundle.generate(options)
-            },
-            write(dest, options = {}) {
-                
-            }
-        }
-    })
+    return bundle.build()
 }
 
