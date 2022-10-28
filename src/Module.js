@@ -1,6 +1,7 @@
 import { parse } from 'acorn'
 import MagicString from 'magic-string'
 import analyse from './ast/analyse.js'
+import { hasOwnProperty } from './utils/helper.js'
 
 export default class Module {
 	constructor({ code, path, bundle }) {

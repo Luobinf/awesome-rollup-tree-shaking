@@ -16,9 +16,11 @@ const options = {
 
 debugger
 
-rollup(entry, options).then(res => {
-    const result = res.generate(options)
-    console.log( result )
-    const code = result.code
-    fs.writeFileSync('./bundle.js', code)
-});
+rollup(entry, options)
+
+// then(res => {
+//     const result = res.generate(options)
+//     console.log( result )
+//     const code = result.code
+//     fs.writeFileSync('./bundle.js', code)
+// });

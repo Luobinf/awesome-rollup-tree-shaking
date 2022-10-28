@@ -24,7 +24,7 @@ export default function analyse(ast, magicString, module) {
 		Object.defineProperties(statement, {
 			_defines: { value: {} },
 			_dependsOn: { value: {} },
-			_included: { value: false },
+			_included: { value: false, writable: true },
 			_module: { value: module },
 			_source: { value: magicString.snip(statement.start, statement.end) },
 		})
@@ -56,7 +56,7 @@ export default function analyse(ast, magicString, module) {
 							names,
 							parent: scope,
 						})
-					// 例如 if(true) {} 中的 块级作用域
+					// 例如 if(true) { let name = 90 } 中的 块级作用域
 					case 'BlockStatement':
 						newScope = new Scope({
 							name: '块级作用域',
@@ -101,10 +101,11 @@ export default function analyse(ast, magicString, module) {
 					return
 				}
 
+				// name 变量所在的作用域，用于判断该变量是否需要添加到 _dependsOn 中去。
 				const definingScope = scope.findDefiningScope(node.name)
 				// statement 语句收集 _dependsOn 时，深度递归会遇到定义的变量与依赖的变量，需要排除定义的变量。
 				// for example：let aliasName = 'jack' + name，需要把 aliasName 变量忽视。
-				if(!definingScope && !statement._defines[node.name]) {
+				if((!definingScope || definingScope.depth === 0)&& !statement._defines[node.name]) {
 					statement._dependsOn[node.name] = true
 				}
 			}

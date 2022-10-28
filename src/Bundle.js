@@ -1,8 +1,10 @@
 import { resolve } from "path";
 import fs from "fs";
 import { defaultResolver } from './utils/resolvePath.js'
-import { fileIsExist, hasOwnProperty } from './utils/helper.js'
+import { fileIsExist } from './utils/helper.js'
 import Module from './Module.js'
+import MagicString, { Bundle as MagicStringBundle} from 'magic-string'
+
 
 export default class Bundle {
     constructor(options) {
@@ -11,6 +13,7 @@ export default class Bundle {
         this.entryModule = null
         this.modulePromises = {}  // 存放所有的模块
         this.statements = []
+        this.dest = options.dest
     }
 
     build() {
@@ -18,7 +21,11 @@ export default class Bundle {
         this.entryModule = entryModule
         const statements = entryModule.expandAllStatements(true)
         this.statements = statements
-        return statements
+        const code = this.generate(); //生成打包后的代码
+        fs.writeFileSync(this.dest, code, {
+            encoding: 'utf-8'
+        }); //写入文件系统
+        // return statements
     }
 
     fetchModule(importee, importer) {
@@ -40,8 +47,22 @@ export default class Bundle {
         }
     }
 
-    generate(options = {}) {
-
+    generate() {
+        const { statements } = this
+        const bundle = new MagicStringBundle();
+        const newLines = "\n";
+        statements.forEach(statement => {
+            const source = statement._source.clone()
+            if (statement.type === 'ExportNamedDeclaration') {
+                // remove `export` from `export var foo = 42`
+                source.remove(statement.start, statement.declaration.start)
+            }
+            bundle.addSource({
+                content: source,
+                separator: newLines,
+            });
+        })
+        return bundle.toString()
     }
 
 }
