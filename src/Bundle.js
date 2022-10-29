@@ -12,6 +12,7 @@ export default class Bundle {
     this.entryModule = null;
     // 存放所有的模块，用于模块缓存
     this.modules = new Map();
+    // 存放所有的语句，用于生成代码时用
     this.statements = [];
     this.dest = options.dest;
   }
@@ -31,7 +32,7 @@ export default class Bundle {
   fetchModule(importee, importer) {
     const path = importer ? this.resolvePath(importee, importer) : importee;
     if (this.modules.has(path)) {
-      return this.modules[path];
+      return this.modules.get(path);
     }
     const isExist = fileIsExist(path);
     if (isExist) {
@@ -43,7 +44,7 @@ export default class Bundle {
         path,
         bundle: this,
       });
-      this.modules[path] = module;
+      this.modules.set(path, module);
       return module;
     } else {
       throw new Error(`file ${path} is not exist`);

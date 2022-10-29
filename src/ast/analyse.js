@@ -27,6 +27,7 @@ export default function analyse(ast, magicString, module) {
 			_included: { value: false, writable: true },
 			_module: { value: module },
 			_source: { value: magicString.snip(statement.start, statement.end) },
+			_modifications: { value: {} }
 		})
 
 		currentTopLevelStatement = statement
@@ -111,6 +112,16 @@ export default function analyse(ast, magicString, module) {
 			}
 		}
 
+		function checkForModificate(node) {
+			if(node.type === 'AssignmentExpression') {
+				statement._modifications[node.left.name] = true
+			}
+
+			if(node.type === 'UpdateExpression') {
+				statement._modifications[node.argument.name] = true
+			}
+		}
+
 		walk(statement, {
 			enter(node, parent) {
 				if(/^Import/.test( node.type )) return
@@ -118,6 +129,7 @@ export default function analyse(ast, magicString, module) {
 				if(node._scope) scope = node._scope
 
 				checkForReads(node, parent)
+				checkForModificate(node, parent)
 
 			},
 			leave(node) {
