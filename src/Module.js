@@ -153,6 +153,8 @@ export default class Module {
 				allStatements = (statements.slice(0, length - 1) || []).concat(
 					allStatements
 				);
+			} else {
+				allStatements.push(...statements)
 			}
 		});
 
