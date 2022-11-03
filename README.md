@@ -209,7 +209,7 @@ const config = {
 至此，我们大概了解了 Webpack 进行 Tree Shaking 的原理。
 
 
-## 实现一个简单的 Tree Shaking 脚本
+## 如何实现一个简单的 Tree Shaking 脚本？
 
 
 
